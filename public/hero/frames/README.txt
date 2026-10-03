@@ -1,0 +1,3 @@
+Put your extracted frames here: frame_0001.jpg, frame_0002.jpg, ...
+The site counts whatever is in this folder, so any number of frames works.
+Run `npm run frames -- path/to/your-video.mp4` to generate them.

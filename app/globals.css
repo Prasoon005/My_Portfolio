@@ -1,0 +1,2558 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-serif: var(--font-instrument), "Iowan Old Style", "Times New Roman", serif;
+  --color-ink: #141518;
+  --color-graphite: #55585e;
+  --color-stage: var(--stage);
+}
+
+:root {
+  /* Overwritten at runtime with the colour sampled from frame_0001's corners. */
+  --stage: #cdcac5;
+  --paper: #f4f4f2;
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.45, 0.64, 1);
+  color-scheme: light;
+}
+
+html {
+  background: var(--stage);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--stage);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Paper grain over everything: the page reads as printed stock, not a screen. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: -50%;
+  z-index: 90;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.09;
+  pointer-events: none;
+  animation: grain 900ms steps(4) infinite;
+}
+
+@keyframes grain {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-3%, 2%);
+  }
+  50% {
+    transform: translate(2%, -3%);
+  }
+  75% {
+    transform: translate(-2%, -1%);
+  }
+}
+
+::selection {
+  background: var(--color-ink);
+  color: var(--paper);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 3px;
+  border-radius: 999px;
+}
+
+/* ---------- Hero ---------- */
+
+.hero-track {
+  height: 380vh;
+}
+
+@media (max-width: 768px), (prefers-reduced-motion: reduce) {
+  .hero-track {
+    height: 100svh;
+  }
+}
+
+.sculpt {
+  transform-origin: 50% 45%;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+.headline {
+  color: var(--color-ink);
+  font-size: clamp(1.75rem, 7.6vw, 3rem);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+}
+
+@media (min-width: 768px) {
+  .headline {
+    /* The head's width follows the window height, so the vh term keeps the
+       longest line clear of it on squarer windows. */
+    font-size: clamp(1.75rem, min(3.4vw, 6vw - 3.8vh), 4.25rem);
+  }
+}
+
+.headline-face {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  will-change: transform;
+  transform-origin: 50% 50%;
+}
+
+.scrim-left {
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--stage) 88%, transparent) 0%,
+    color-mix(in oklab, var(--stage) 55%, transparent) 38%,
+    transparent 100%
+  );
+}
+
+.scrim-right {
+  background: linear-gradient(270deg, color-mix(in oklab, var(--stage) 65%, transparent) 0%, transparent 100%);
+}
+
+.scrim-top {
+  background: linear-gradient(180deg, color-mix(in oklab, var(--stage) 75%, transparent) 0%, transparent 100%);
+}
+
+.scrim-bottom {
+  background: linear-gradient(0deg, color-mix(in oklab, var(--stage) 85%, transparent) 0%, transparent 100%);
+}
+
+/* ---------- Navigation ---------- */
+
+.glass {
+  --glow: 0;
+  background:
+    radial-gradient(
+      9rem circle at var(--mx, 50%) var(--my, 0px),
+      rgb(255 255 255 / calc(var(--glow) * 0.6)),
+      transparent 70%
+    ),
+    color-mix(in oklab, white 36%, transparent);
+  -webkit-backdrop-filter: blur(22px) saturate(170%);
+  backdrop-filter: blur(22px) saturate(170%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.6),
+    inset 0 0 0 1px rgb(255 255 255 / 0.32),
+    0 12px 32px -16px rgb(20 21 24 / 0.4);
+  transition:
+    --glow 400ms ease,
+    transform 300ms ease-out;
+}
+
+.cta {
+  --glow: 0;
+  background:
+    radial-gradient(
+      7rem circle at var(--mx, 50%) var(--my, 0px),
+      rgb(255 255 255 / calc(var(--glow) * 0.3)),
+      transparent 70%
+    ),
+    linear-gradient(180deg, #2a2c31 0%, var(--color-ink) 100%);
+  color: var(--paper);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.14),
+    0 14px 30px -14px rgb(20 21 24 / 0.6);
+  transition:
+    --glow 400ms ease,
+    transform 300ms ease-out,
+    box-shadow 300ms ease-out;
+}
+
+/* Pulled toward the cursor by CursorGlow; springs back when it leaves. */
+.magnetic {
+  transition:
+    --glow 400ms ease,
+    box-shadow 300ms ease-out,
+    translate 600ms var(--ease-spring);
+}
+
+.magnetic[data-pull] {
+  transition:
+    --glow 400ms ease,
+    box-shadow 300ms ease-out,
+    translate 120ms linear;
+}
+
+/* ---------- Cursor ---------- */
+
+/* 0 at rest, 1 while hovered. Registered so the highlight can fade. */
+@property --glow {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
+@media (hover: hover) {
+  .panel:hover,
+  .glass:hover,
+  .cta:hover {
+    --glow: 1;
+  }
+
+  .cta:hover {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.3),
+      0 0 0 1px rgb(255 255 255 / 0.25),
+      0 18px 36px -14px rgb(20 21 24 / 0.7);
+  }
+}
+
+/* The light that trails the cursor behind the page; positioned by CursorGlow. */
+.cursor-ambient {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  width: 44rem;
+  height: 44rem;
+  margin: -22rem 0 0 -22rem;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(255 255 255 / 0.34), transparent);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 600ms ease;
+  will-change: transform;
+}
+
+/* Dot and ring are white in difference mode, so they read as ink on the stone
+   and as paper over anything inked. */
+.cursor-dot,
+.cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 99;
+  pointer-events: none;
+  mix-blend-mode: difference;
+  opacity: 0;
+  transition: opacity 300ms ease;
+  will-change: transform;
+}
+
+.cursor-dot {
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  border-radius: 50%;
+  background: white;
+}
+
+.cursor-ring {
+  width: 2.5rem;
+  height: 2.5rem;
+  margin: -1.25rem 0 0 -1.25rem;
+}
+
+.cursor-ring::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid white;
+  transition:
+    transform 450ms var(--ease-spring),
+    background 300ms ease;
+}
+
+.cursor-ring::after {
+  content: attr(data-label);
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: black;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0;
+  transform: scale(0.6);
+  transition:
+    opacity 250ms ease,
+    transform 450ms var(--ease-spring);
+}
+
+.cursor-ring[data-hot]::before {
+  transform: scale(1.6);
+}
+
+.cursor-ring[data-label]::before {
+  transform: scale(2.3);
+  background: white;
+}
+
+.cursor-ring[data-label]::after {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.cursor-ring[data-down]::before {
+  transform: scale(0.8);
+}
+
+/* ---------- Scroll progress ---------- */
+
+.scroll-progress {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 70;
+  height: 2px;
+  transform: scaleX(0);
+  transform-origin: left;
+  background: var(--color-ink);
+  pointer-events: none;
+}
+
+/* ---------- Sections ---------- */
+
+.wrap {
+  margin-inline: auto;
+  max-width: 1240px;
+  padding-inline: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .wrap {
+    padding-inline: 2.5rem;
+  }
+}
+
+.section {
+  padding-block: 7rem;
+}
+
+@media (min-width: 768px) {
+  .section {
+    padding-block: 10rem;
+  }
+}
+
+.section-title {
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--color-graphite);
+  font-size: 0.8125rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.eyebrow-rule {
+  width: 2.5rem;
+  height: 1px;
+  background: color-mix(in oklab, var(--color-ink) 30%, transparent);
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 900ms var(--ease-out) 200ms;
+}
+
+.reveal[data-in] .eyebrow-rule {
+  transform: scaleX(1);
+}
+
+/* The serif tail: letters ripple when the heading is hovered, and a
+   hand-drawn stroke is inked under it as it scrolls in. */
+.tail {
+  position: relative;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.tail-char {
+  display: inline-block;
+}
+
+.scribble {
+  position: absolute;
+  left: -2%;
+  bottom: -0.16em;
+  width: 104%;
+  height: 0.32em;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.scribble path {
+  fill: none;
+  stroke: var(--color-ink);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 1200ms var(--ease-out) 450ms;
+}
+
+.reveal[data-in] .scribble path {
+  stroke-dashoffset: 0;
+}
+
+@media (hover: hover) {
+  .section-title:hover .tail-char {
+    animation: ripple 700ms var(--ease-spring) both;
+    animation-delay: calc(var(--i) * 35ms);
+  }
+}
+
+@keyframes ripple {
+  0% {
+    transform: none;
+  }
+  40% {
+    transform: translateY(-0.18em) rotate(-6deg);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+/* ---------- Panels ---------- */
+
+/* Frosted card, the same material as the nav pill but without the blur.
+   It leans toward the cursor; a `.flood` card fills with ink from wherever
+   the cursor came in. */
+.panel {
+  --glow: 0;
+  --tilt: 0;
+  position: relative;
+  isolation: isolate;
+  border-radius: 1.75rem;
+  background:
+    radial-gradient(
+      26rem circle at var(--mx, 50%) var(--my, 0px),
+      rgb(255 255 255 / calc(var(--glow) * 0.65)),
+      transparent 65%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, white 46%, transparent) 0%,
+      color-mix(in oklab, white 26%, transparent) 100%
+    );
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.7),
+    inset 0 0 0 1px rgb(255 255 255 / 0.34),
+    0 24px 48px -32px rgb(20 21 24 / 0.38);
+  transition:
+    --glow 450ms ease,
+    transform 350ms var(--ease-out),
+    box-shadow 350ms var(--ease-out);
+}
+
+/* Cards rise toward the cursor. Not the form: it shouldn't move while typed in. */
+@media (hover: hover) {
+  .panel:not(form):hover {
+    transform: perspective(1100px) rotateX(calc(var(--ty, 0) * var(--tilt) * -1deg))
+      rotateY(calc(var(--tx, 0) * var(--tilt) * 1deg)) translateY(-6px) scale(1.015);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.85),
+      inset 0 0 0 1px rgb(255 255 255 / 0.45),
+      0 0 40px -8px rgb(255 255 255 / 0.55),
+      0 36px 60px -30px rgb(20 21 24 / 0.5);
+  }
+}
+
+/* How far a card leans toward the cursor, in degrees at its edge. */
+.tilt {
+  --tilt: 6;
+}
+
+.tilt-soft {
+  --tilt: 1.5;
+}
+
+/* Bright rim that follows the cursor: only the 1px ring is painted. */
+.panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  padding: 1px;
+  border-radius: inherit;
+  background: radial-gradient(16rem circle at var(--mx, 50%) var(--my, 0px), rgb(255 255 255), transparent 70%);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+  opacity: var(--glow);
+  pointer-events: none;
+}
+
+/* Ink pours in from the entry point (--fx/--fy, set by CursorGlow) and drains
+   back out toward wherever the cursor leaves. */
+.flood::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background:
+    radial-gradient(30rem circle at var(--mx, 50%) var(--my, 0px), rgb(255 255 255 / 0.09), transparent 60%),
+    var(--color-ink);
+  clip-path: circle(0% at var(--fx, 50%) var(--fy, 50%));
+  transition: clip-path 650ms var(--ease-out);
+  pointer-events: none;
+}
+
+.flood {
+  transition:
+    --glow 450ms ease,
+    color 350ms ease 80ms,
+    transform 350ms var(--ease-out),
+    box-shadow 350ms var(--ease-out);
+}
+
+.flood .text-graphite {
+  transition: color 350ms ease 80ms;
+}
+
+@media (hover: hover) {
+  .flood:hover::after {
+    clip-path: circle(150% at var(--fx, 50%) var(--fy, 50%));
+  }
+
+  .flood:hover {
+    color: var(--paper);
+  }
+
+  .flood:hover .text-graphite {
+    color: color-mix(in oklab, var(--paper) 62%, transparent);
+  }
+
+  .flood:hover::before {
+    opacity: 0.35;
+  }
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.4rem 0.85rem;
+  background: color-mix(in oklab, var(--color-ink) 6%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-ink) 9%, transparent);
+  font-size: 0.875rem;
+  line-height: 1.2;
+  white-space: nowrap;
+  transition:
+    transform 300ms var(--ease-spring),
+    background 250ms ease-out,
+    color 250ms ease-out,
+    opacity 300ms ease,
+    box-shadow 250ms ease-out;
+}
+
+@media (hover: hover) {
+  .chip:hover,
+  .chip[data-active] {
+    transform: translateY(-2px);
+    background: var(--color-ink);
+    color: var(--paper);
+    box-shadow: 0 10px 18px -10px rgb(20 21 24 / 0.7);
+  }
+}
+
+.chip:focus-visible,
+.chip[data-active] {
+  background: var(--color-ink);
+  color: var(--paper);
+}
+
+/* While one chip in a set is hovered, its siblings step back. */
+.chip-set:has(.chip[data-active]) .chip:not([data-active]) {
+  opacity: 0.38;
+}
+
+/* Bullet that turns into a dash when its card is hovered. */
+.bullet {
+  height: 1.5px;
+  width: 5px;
+  background: color-mix(in oklab, var(--color-ink) 45%, transparent);
+  transition:
+    width 450ms var(--ease-out),
+    background 300ms ease;
+}
+
+@media (hover: hover) {
+  .panel:hover .bullet {
+    width: 12px;
+    background: var(--color-ink);
+  }
+}
+
+/* ---------- Journey ---------- */
+
+/* The rule fills downward as the timeline scrolls past. */
+.journey-line {
+  --p: 0;
+  top: 0.75rem;
+  bottom: 0.75rem;
+  left: 5px;
+  width: 1px;
+}
+
+.journey-line > span {
+  transform-origin: top;
+  transform: scaleY(var(--p));
+}
+
+/* A spark riding the leading edge of the fill. */
+.journey-line::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: calc(var(--p) * 100%);
+  width: 7px;
+  height: 7px;
+  margin: -3.5px 0 0 -3.5px;
+  border-radius: 50%;
+  background: var(--color-ink);
+  box-shadow:
+    0 0 0 3px var(--stage),
+    0 0 0 4px color-mix(in oklab, var(--color-ink) 30%, transparent);
+  opacity: min(calc(var(--p) * 40), 1);
+}
+
+.journey-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in oklab, var(--color-ink) 35%, transparent);
+  background: var(--stage);
+  transition:
+    transform 500ms var(--ease-spring),
+    background 400ms ease,
+    border-color 400ms ease;
+}
+
+.journey-step[data-lit] .journey-dot {
+  background: var(--color-ink);
+  border-color: var(--color-ink);
+}
+
+/* The big outlined step number behind each card. */
+.ghost-num {
+  position: absolute;
+  right: 1.5rem;
+  bottom: -1.75rem;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: clamp(6rem, 12vw, 10rem);
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px color-mix(in oklab, var(--color-ink) 14%, transparent);
+  pointer-events: none;
+  user-select: none;
+  transition:
+    transform 900ms var(--ease-out),
+    -webkit-text-stroke-color 400ms ease 80ms;
+}
+
+/* Title underline that draws in from the left. */
+.sweep {
+  background: linear-gradient(currentColor, currentColor) no-repeat 0 100% / 0% 1px;
+  padding-bottom: 2px;
+  transition: background-size 650ms var(--ease-out) 120ms;
+}
+
+@media (hover: hover) {
+  .journey-step:hover .journey-dot {
+    transform: scale(1.7);
+    background: var(--color-ink);
+    border-color: var(--color-ink);
+    animation: dot-pulse 1.6s ease-out infinite;
+  }
+
+  .journey-step:hover .ghost-num {
+    transform: translateX(-1.5rem) rotate(-6deg);
+    -webkit-text-stroke-color: color-mix(in oklab, var(--paper) 40%, transparent);
+  }
+
+  .panel:hover .sweep {
+    background-size: 100% 1px;
+  }
+}
+
+@keyframes dot-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgb(20 21 24 / 0.45);
+  }
+  100% {
+    box-shadow: 0 0 0 12px rgb(20 21 24 / 0);
+  }
+}
+
+/* ---------- Toolkit ---------- */
+
+/* Two rows of every tool, drifting in opposite directions. Scrolling speeds
+   them up, flips their direction and leans them; see Toolkit's Marquee. */
+.marquee {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+}
+
+.marquee-item {
+  display: inline-flex;
+  align-items: center;
+  font-size: clamp(2.25rem, 5.5vw, 4.75rem);
+  line-height: 1.15;
+  white-space: nowrap;
+  transition:
+    color 300ms ease,
+    -webkit-text-stroke-color 300ms ease;
+}
+
+.marquee-solid .marquee-item {
+  color: var(--color-ink);
+}
+
+.marquee-outline .marquee-item {
+  color: transparent;
+  -webkit-text-stroke: 1px color-mix(in oklab, var(--color-ink) 45%, transparent);
+}
+
+.marquee-sep {
+  display: inline-block;
+  width: 0.28em;
+  height: 0.28em;
+  margin-inline: 0.5em;
+  border-radius: 50%;
+  border: 1px solid color-mix(in oklab, var(--color-ink) 45%, transparent);
+}
+
+@media (hover: hover) {
+  .marquee-solid .marquee-item:hover {
+    color: transparent;
+    -webkit-text-stroke: 1px var(--color-ink);
+  }
+
+  .marquee-outline .marquee-item:hover {
+    color: var(--color-ink);
+    -webkit-text-stroke-color: var(--color-ink);
+  }
+}
+
+.tool-glyph {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.75rem;
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-ink) 18%, transparent);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  transition:
+    transform 600ms var(--ease-spring),
+    background 300ms ease,
+    color 300ms ease;
+}
+
+@media (hover: hover) {
+  .panel:hover .tool-glyph {
+    transform: rotate(-90deg);
+    background: var(--color-ink);
+    color: var(--paper);
+  }
+}
+
+.tool-readout {
+  min-height: 2.6em;
+  font-variant-numeric: tabular-nums;
+}
+
+.cert {
+  position: relative;
+  transition: padding-left 450ms var(--ease-out);
+}
+
+.cert::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--color-ink);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 550ms var(--ease-out);
+}
+
+.cert-arrow {
+  display: inline-block;
+  opacity: 0;
+  transform: translateX(-6px);
+  transition:
+    opacity 300ms ease,
+    transform 450ms var(--ease-out);
+}
+
+@media (hover: hover) {
+  .cert:hover {
+    padding-left: 0.6rem;
+  }
+
+  .cert:hover::before {
+    transform: scaleX(1);
+  }
+
+  .cert:hover .cert-arrow {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------- Contact form ---------- */
+
+.field {
+  display: block;
+  width: 100%;
+  border-radius: 1rem;
+  padding: 0.85rem 1rem;
+  background: color-mix(in oklab, white 52%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-ink) 12%, transparent);
+  color: var(--color-ink);
+  font-size: 1rem;
+  line-height: 1.4;
+  transition:
+    background 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.field::placeholder {
+  color: color-mix(in oklab, var(--color-graphite) 70%, transparent);
+}
+
+.field:focus,
+.field:focus-visible {
+  outline: none;
+  border-radius: 1rem;
+  background: color-mix(in oklab, white 78%, transparent);
+  box-shadow: inset 0 0 0 1.5px var(--color-ink);
+}
+
+select.field {
+  appearance: none;
+  padding-right: 2.5rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1.5l5 5 5-5' stroke='%23141518' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+}
+
+textarea.field {
+  min-height: 9rem;
+  resize: vertical;
+}
+
+/* ---------- Scroll reveal ---------- */
+
+/* Pops up into place, overshooting slightly, the first time it scrolls into view. */
+.reveal {
+  opacity: 0;
+  transform: translateY(44px) scale(0.92);
+  transition:
+    opacity 600ms ease-out,
+    transform 800ms var(--ease-spring);
+  transition-delay: var(--d, 0ms);
+}
+
+.reveal[data-in] {
+  opacity: 1;
+  transform: none;
+}
+
+/* Entrance finished: hand back to the panel's quicker hover transitions. */
+.reveal[data-done] {
+  transition:
+    --glow 450ms ease,
+    color 350ms ease 80ms,
+    transform 350ms var(--ease-out),
+    box-shadow 350ms var(--ease-out);
+  transition-delay: 0ms;
+}
+
+/* ---------- Scroll-inked text ---------- */
+
+/* Each word fades from pencil-grey to ink as the reading position (--p) passes it. */
+.ink-word {
+  opacity: clamp(0.16, calc(var(--p, 0) * (var(--n) + 4) - var(--i)), 1);
+  transition: opacity 120ms linear;
+}
+
+/* ---------- Exploded stack ---------- */
+
+.stack {
+  --gap: 2.6rem;
+  display: grid;
+  place-items: center;
+  height: 21rem;
+  perspective: 1600px;
+}
+
+/* Spread the layers apart while the diagram has the pointer. */
+.stack[data-held] {
+  --gap: 3.6rem;
+}
+
+.stack-scene {
+  position: relative;
+  width: 11.5rem;
+  height: 11.5rem;
+  transform-style: preserve-3d;
+  /* Pushed down so the raised plates sit centred. */
+  transform: translateY(4.5rem) rotateX(58deg) rotateZ(-42deg);
+}
+
+.plate {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  padding: 1.1rem;
+  border-radius: 1.1rem;
+  background: color-mix(in oklab, white 50%, transparent);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.7),
+    0 0 0 1px color-mix(in oklab, var(--color-ink) 10%, transparent),
+    0 30px 40px -24px rgb(20 21 24 / 0.35);
+  transform: translateZ(calc(var(--z) * var(--gap)));
+  transition:
+    transform 700ms var(--ease-spring),
+    background 350ms ease,
+    color 350ms ease;
+}
+
+.plate[data-active] {
+  transform: translateZ(calc(var(--z) * var(--gap) + 1.6rem));
+  background: var(--color-ink);
+  color: var(--paper);
+}
+
+.plate-art {
+  width: 100%;
+  height: 100%;
+}
+
+.plate-art i {
+  display: block;
+  min-height: 0.5rem;
+  border-radius: 0.3rem;
+  background: currentColor;
+  opacity: 0.16;
+}
+
+.plate[data-active] .plate-art i {
+  opacity: 0.32;
+}
+
+.plate-glyph {
+  font-size: 3.5rem;
+  line-height: 1;
+  opacity: 0.25;
+}
+
+.plate[data-active] .plate-glyph {
+  opacity: 0.8;
+}
+
+.plate-label {
+  position: absolute;
+  left: 1.1rem;
+  bottom: -1.6rem;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-graphite);
+  opacity: 0;
+  transition: opacity 300ms ease;
+}
+
+.plate[data-active] .plate-label {
+  opacity: 1;
+}
+
+.layer-row {
+  display: grid;
+  grid-template-columns: 2.25rem 1fr;
+  align-items: baseline;
+  width: 100%;
+  padding: 0.8rem 0.9rem;
+  border-radius: 1rem;
+  text-align: left;
+  transition:
+    background 300ms ease,
+    padding-left 400ms var(--ease-out);
+}
+
+.layer-row[data-active] {
+  padding-left: 1.3rem;
+  background: color-mix(in oklab, white 55%, transparent);
+}
+
+/* Only the active layer shows its detail line. */
+.layer-detail {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition:
+    max-height 450ms var(--ease-out),
+    opacity 300ms ease;
+}
+
+.layer-row[data-active] .layer-detail {
+  max-height: 3.2em;
+  opacity: 1;
+}
+
+@media (max-width: 767px) {
+  .stack {
+    --gap: 2rem;
+    height: 17rem;
+  }
+
+  .stack[data-held] {
+    --gap: 2.6rem;
+  }
+
+  .stack-scene {
+    width: 9rem;
+    height: 9rem;
+    transform: translateY(3.5rem) rotateX(58deg) rotateZ(-42deg);
+  }
+}
+
+/* ---------- Craft demos ---------- */
+
+.demo-stage {
+  height: 8.5rem;
+  border-radius: 1.1rem;
+  padding: 1rem;
+  background: color-mix(in oklab, white 42%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-ink) 8%, transparent);
+}
+
+/* Easing */
+.easing {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.1rem;
+  height: 100%;
+  cursor: pointer;
+}
+
+.easing-row {
+  display: grid;
+  grid-template-columns: 4.25rem 1fr;
+  align-items: center;
+}
+
+.easing-name {
+  text-align: left;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-graphite);
+}
+
+.easing-track {
+  position: relative;
+  height: 1px;
+  background: color-mix(in oklab, var(--color-ink) 18%, transparent);
+}
+
+.easing-ball {
+  position: absolute;
+  top: -7px;
+  left: 0;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--color-ink);
+  transition: left 1100ms linear;
+}
+
+.easing-ball[data-curve="ease-out"] {
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.easing[data-played] .easing-ball {
+  left: calc(100% - 14px);
+}
+
+/* Feedback */
+.morph-button {
+  display: grid;
+  place-items: center;
+  min-width: 9.5rem;
+  height: 2.9rem;
+  padding-inline: 1.3rem;
+  border-radius: 999px;
+  background: var(--color-ink);
+  color: var(--paper);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    min-width 450ms var(--ease-spring),
+    padding 450ms var(--ease-spring),
+    background 300ms ease,
+    color 300ms ease,
+    transform 200ms ease;
+}
+
+.morph-button:active {
+  transform: scale(0.96);
+}
+
+.morph-button[data-phase="busy"] {
+  min-width: 2.9rem;
+  padding-inline: 0;
+  cursor: progress;
+}
+
+.morph-button[data-phase="done"] {
+  background: var(--paper);
+  color: var(--color-ink);
+  box-shadow: inset 0 0 0 1px var(--color-ink);
+}
+
+.spinner {
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 50%;
+  border: 1.5px solid color-mix(in oklab, var(--paper) 30%, transparent);
+  border-top-color: var(--paper);
+  animation: spin 700ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+/* Contrast */
+.contrast {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.contrast-sample {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.75rem;
+  background: var(--paper);
+  color: var(--grey);
+}
+
+.contrast-text {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.3rem;
+  line-height: 1.1;
+}
+
+.contrast-grade {
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: var(--color-ink);
+  color: var(--paper);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.contrast-grade[data-fail] {
+  background: transparent;
+  color: var(--color-ink);
+  box-shadow: inset 0 0 0 1px var(--color-ink);
+  text-decoration: line-through;
+}
+
+.contrast-range {
+  width: 100%;
+  height: 1.25rem;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.contrast-range::-webkit-slider-runnable-track {
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--color-ink), rgb(225 225 225));
+}
+
+.contrast-range::-moz-range-track {
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--color-ink), rgb(225 225 225));
+}
+
+.contrast-range::-webkit-slider-thumb {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  margin-top: -7px;
+  border-radius: 50%;
+  background: var(--paper);
+  box-shadow:
+    0 0 0 1.5px var(--color-ink),
+    0 4px 10px -3px rgb(20 21 24 / 0.5);
+}
+
+.contrast-range::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--paper);
+  box-shadow: 0 0 0 1.5px var(--color-ink);
+}
+
+/* Density */
+.segmented {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  padding: 3px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--color-ink) 7%, transparent);
+}
+
+.segmented-thumb {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  width: calc((100% - 6px) / 3);
+  border-radius: 999px;
+  background: var(--color-ink);
+  transform: translateX(calc(var(--pick) * 100%));
+  transition: transform 450ms var(--ease-spring);
+}
+
+.segmented button {
+  position: relative;
+  padding: 0.3rem 0;
+  font-size: 12px;
+  color: var(--color-graphite);
+  cursor: pointer;
+  transition: color 300ms ease;
+}
+
+.segmented button[aria-checked="true"] {
+  color: var(--paper);
+}
+
+.density-card {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--unit);
+  padding: var(--unit);
+  border-radius: 0.6rem;
+  background: var(--paper);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-ink) 10%, transparent);
+  overflow: hidden;
+  transition:
+    gap 500ms var(--ease-out),
+    padding 500ms var(--ease-out);
+}
+
+.density-card i {
+  display: block;
+  height: 5px;
+  flex-shrink: 0;
+  border-radius: 3px;
+  background: color-mix(in oklab, var(--color-ink) 18%, transparent);
+}
+
+.density-card .density-cta {
+  width: 2.75rem;
+  height: 10px;
+  margin-top: auto;
+  background: var(--color-ink);
+}
+
+/* ---------- Work filter ---------- */
+
+.work-filter {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows 500ms var(--ease-out),
+    opacity 400ms ease;
+}
+
+.work-filter > * {
+  overflow: hidden;
+}
+
+.work-filter[data-shown] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+/* ---------- Work index ---------- */
+
+.work-index {
+  border-top: 1px solid color-mix(in oklab, var(--color-ink) 15%, transparent);
+}
+
+.work-row {
+  border-bottom: 1px solid color-mix(in oklab, var(--color-ink) 15%, transparent);
+  transition:
+    opacity 450ms ease,
+    filter 450ms ease;
+}
+
+/* Hovering one row steps the rest back; so does a tool filter. */
+@media (hover: hover) {
+  .work-index:has(.work-row[data-hover]) .work-row:not([data-hover]):not([data-open]) {
+    opacity: 0.35;
+  }
+}
+
+.work-row[data-dimmed] {
+  opacity: 0.2;
+  filter: blur(1.5px);
+}
+
+.work-head {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  padding-block: clamp(1.25rem, 2.6vw, 2.25rem);
+  text-align: left;
+  cursor: pointer;
+}
+
+@media (min-width: 768px) {
+  .work-head {
+    grid-template-columns: 4rem 1fr auto;
+  }
+}
+
+.work-num {
+  font-size: clamp(1.1rem, 1.6vw, 1.5rem);
+  color: var(--color-graphite);
+  transition: color 300ms ease;
+}
+
+.work-name {
+  font-size: clamp(1.9rem, 5.4vw, 4.75rem);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.045em;
+  transition:
+    transform 600ms var(--ease-out),
+    letter-spacing 600ms var(--ease-out);
+}
+
+.work-meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 14px;
+}
+
+/* A plus that turns into a minus as the case opens. */
+.work-toggle {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  flex-shrink: 0;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-ink) 25%, transparent);
+  transition:
+    background 300ms ease,
+    transform 600ms var(--ease-spring);
+}
+
+.work-toggle::before,
+.work-toggle::after {
+  content: "";
+  position: absolute;
+  width: 12px;
+  height: 1.5px;
+  background: var(--color-ink);
+  transition:
+    transform 500ms var(--ease-spring),
+    background 300ms ease;
+}
+
+.work-toggle::after {
+  transform: rotate(90deg);
+}
+
+.work-row[data-open] .work-toggle {
+  background: var(--color-ink);
+  transform: rotate(180deg);
+}
+
+.work-row[data-open] .work-toggle::before,
+.work-row[data-open] .work-toggle::after {
+  background: var(--paper);
+}
+
+.work-row[data-open] .work-toggle::after {
+  transform: rotate(0deg);
+}
+
+@media (hover: hover) {
+  .work-row[data-hover] .work-name {
+    transform: translateX(1.25rem);
+    letter-spacing: -0.035em;
+  }
+
+  .work-row[data-hover] .work-num {
+    color: var(--color-ink);
+  }
+
+  .work-row[data-hover] .work-toggle {
+    transform: rotate(90deg);
+  }
+
+  .work-row[data-open][data-hover] .work-toggle {
+    transform: rotate(180deg);
+  }
+}
+
+/* The case study opens in place. */
+.case {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 700ms var(--ease-out);
+}
+
+.work-row[data-open] .case {
+  grid-template-rows: 1fr;
+}
+
+.case-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.case-inner > * {
+  opacity: 0;
+  transform: translateY(1.5rem);
+  transition:
+    opacity 400ms ease,
+    transform 700ms var(--ease-out);
+}
+
+.work-row[data-open] .case-inner > * {
+  opacity: 1;
+  transform: none;
+  transition-delay: 150ms;
+}
+
+.case-shot .mock {
+  font-size: clamp(12px, 1.5vw, 17px);
+}
+
+/* Floating preview: follows the cursor over the index, mouse only. */
+.work-preview {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 60;
+  width: 22rem;
+  pointer-events: none;
+  opacity: 0;
+  scale: 0.85;
+  transition:
+    opacity 300ms ease,
+    scale 500ms var(--ease-spring);
+  will-change: transform;
+}
+
+.work-preview[data-shown] {
+  opacity: 1;
+  scale: 1;
+}
+
+@media not ((hover: hover) and (pointer: fine)) {
+  .work-preview {
+    display: none;
+  }
+}
+
+.work-preview-slide {
+  display: grid;
+}
+
+.work-preview-slide:not([data-on]) {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+
+.work-preview-slide {
+  transition: opacity 250ms ease;
+}
+
+.work-preview .mock {
+  font-size: 11px;
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--color-ink) 12%, transparent),
+    0 40px 70px -30px rgb(20 21 24 / 0.55);
+}
+
+/* ---------- Blueprints ---------- */
+
+.mock {
+  --line: color-mix(in oklab, var(--color-ink) 14%, transparent);
+  overflow: hidden;
+  border-radius: 1.1em;
+  background: var(--paper);
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--color-ink) 10%, transparent);
+  color: var(--color-ink);
+}
+
+/* Animations idle until the blueprint is on show. */
+.mock:not([data-live]) * {
+  animation-play-state: paused !important;
+}
+
+.mock-chrome {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.75em 1em;
+  border-bottom: 1px solid var(--line);
+}
+
+.mock-chrome span {
+  width: 0.6em;
+  height: 0.6em;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-ink) 30%, transparent);
+}
+
+.mock-chrome em {
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0.2em 1.4em;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--color-ink) 5%, transparent);
+  font-size: 0.75em;
+  font-style: normal;
+  color: var(--color-graphite);
+  white-space: nowrap;
+}
+
+.mock-body {
+  aspect-ratio: 16 / 10;
+  padding: 1.1em;
+}
+
+.mock i {
+  display: block;
+  height: 0.45em;
+  border-radius: 0.3em;
+  background: var(--line);
+}
+
+/* HealthAI: vitals and a running ECG trace. */
+.mock-health {
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  gap: 0.8em;
+  height: 100%;
+}
+
+.m-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.m-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.25em 0.7em;
+  border-radius: 999px;
+  background: var(--color-ink);
+  color: var(--paper);
+  font-size: 0.7em;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.m-shield {
+  width: 0.7em;
+  height: 0.8em;
+  background: var(--paper);
+  clip-path: polygon(50% 0, 100% 18%, 100% 55%, 50% 100%, 0 55%, 0 18%);
+}
+
+.m-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6em;
+}
+
+.m-tile,
+.m-panel {
+  border-radius: 0.7em;
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.m-tile {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35em;
+  padding: 0.6em 0.75em;
+}
+
+.m-tile b {
+  font-family: var(--font-serif);
+  font-size: 1.6em;
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.m-tile span {
+  font-size: 0.65em;
+  color: var(--color-graphite);
+}
+
+.m-ecg-wrap {
+  display: grid;
+  padding: 0.6em;
+}
+
+.m-ecg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.m-ecg path {
+  fill: none;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.m-ecg-base {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+.m-ecg-trace {
+  stroke: var(--color-ink);
+  stroke-width: 1.6;
+  stroke-dasharray: 0.22 0.78;
+  animation: ecg 2.4s linear infinite;
+}
+
+@keyframes ecg {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* EduSphere: roles that switch, a chart that grows, a table. */
+.mock-edu {
+  display: grid;
+  grid-template-columns: 2.4em 1fr;
+  gap: 1em;
+  height: 100%;
+}
+
+.m-side {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7em;
+  padding: 0.7em 0.5em;
+  border-radius: 0.7em;
+  background: color-mix(in oklab, var(--color-ink) 5%, transparent);
+}
+
+.mock .m-side i {
+  height: 1.1em;
+  border-radius: 0.35em;
+}
+
+.mock .m-side i[data-on] {
+  background: var(--color-ink);
+}
+
+.m-main {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 0.8em;
+  min-width: 0;
+}
+
+.m-roles {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  width: 70%;
+  padding: 0.2em;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--color-ink) 6%, transparent);
+  font-size: 0.68em;
+  text-align: center;
+}
+
+.m-roles span {
+  position: relative;
+  padding: 0.25em 0;
+}
+
+.m-roles .m-roles-thumb {
+  position: absolute;
+  top: 0.2em;
+  bottom: 0.2em;
+  left: 0.2em;
+  width: calc((100% - 0.4em) / 3);
+  padding: 0;
+  border-radius: 999px;
+  background: var(--paper);
+  box-shadow: 0 1px 4px rgb(20 21 24 / 0.2);
+  animation: roles 4.5s var(--ease-spring) infinite;
+}
+
+@keyframes roles {
+  0%,
+  28% {
+    transform: translateX(0);
+  }
+  33%,
+  61% {
+    transform: translateX(100%);
+  }
+  66%,
+  95% {
+    transform: translateX(200%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.m-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.6em;
+  padding: 0.4em 0.2em 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.mock .m-chart i {
+  flex: 1;
+  border-radius: 0.3em 0.3em 0 0;
+  background: color-mix(in oklab, var(--color-ink) 22%, transparent);
+  transform-origin: bottom;
+  animation: grow 2.6s var(--ease-out) infinite;
+}
+
+.mock .m-chart i:nth-child(4) {
+  background: var(--color-ink);
+}
+
+@keyframes grow {
+  0% {
+    transform: scaleY(0.15);
+  }
+  45%,
+  85% {
+    transform: scaleY(1);
+  }
+  100% {
+    transform: scaleY(0.15);
+  }
+}
+
+.m-table {
+  display: grid;
+  gap: 0.45em;
+}
+
+.m-table > div {
+  display: flex;
+  gap: 0.8em;
+}
+
+/* Job tracker: five stages, one application moving forward. */
+.mock-kanban {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.5em;
+  height: 100%;
+}
+
+.m-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45em;
+  padding: 0.5em 0.4em;
+  border-radius: 0.6em;
+  background: color-mix(in oklab, var(--color-ink) 4%, transparent);
+}
+
+.m-col-name {
+  margin-bottom: 0.2em;
+  font-size: 0.58em;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-graphite);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.m-card {
+  display: grid;
+  gap: 0.35em;
+  padding: 0.5em;
+  border-radius: 0.45em;
+  background: var(--paper);
+  box-shadow:
+    0 0 0 1px var(--line),
+    0 2px 4px -2px rgb(20 21 24 / 0.2);
+}
+
+.mock .m-card i {
+  height: 0.35em;
+}
+
+.m-card-moving {
+  position: absolute;
+  top: 5.8em;
+  left: 0.4em;
+  width: calc((100% - 2em) / 5 - 0.8em);
+  background: var(--color-ink);
+  box-shadow: 0 8px 16px -6px rgb(20 21 24 / 0.6);
+  animation: advance 6s var(--ease-out) infinite;
+}
+
+.mock .m-card-moving i {
+  background: color-mix(in oklab, var(--paper) 45%, transparent);
+}
+
+/* One column is a fifth of the board plus its share of the gaps. */
+@keyframes advance {
+  0%,
+  12% {
+    transform: translateX(calc(100% + 1.3em)) rotate(0);
+    opacity: 0;
+  }
+  18%,
+  32% {
+    transform: translateX(calc(100% + 1.3em));
+    opacity: 1;
+  }
+  44% {
+    transform: translateX(calc(200% + 2.6em)) rotate(3deg);
+  }
+  48%,
+  62% {
+    transform: translateX(calc(200% + 2.6em)) rotate(0);
+  }
+  74% {
+    transform: translateX(calc(300% + 3.9em)) rotate(3deg);
+  }
+  78%,
+  92% {
+    transform: translateX(calc(300% + 3.9em)) rotate(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(calc(300% + 3.9em));
+    opacity: 0;
+  }
+}
+
+/* Face attendance: a camera view, a scan, a lock. */
+.mock-vision {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 0.7em;
+  background: var(--color-ink);
+  color: var(--paper);
+}
+
+.m-corner {
+  position: absolute;
+  width: 1.2em;
+  height: 1.2em;
+  border: 0 solid color-mix(in oklab, var(--paper) 60%, transparent);
+}
+
+.m-tl {
+  top: 0.8em;
+  left: 0.8em;
+  border-width: 1.5px 0 0 1.5px;
+}
+
+.m-tr {
+  top: 0.8em;
+  right: 0.8em;
+  border-width: 1.5px 1.5px 0 0;
+}
+
+.m-bl {
+  bottom: 0.8em;
+  left: 0.8em;
+  border-width: 0 0 1.5px 1.5px;
+}
+
+.m-br {
+  bottom: 0.8em;
+  right: 0.8em;
+  border-width: 0 1.5px 1.5px 0;
+}
+
+.m-person {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  display: grid;
+  justify-items: center;
+  transform: translateX(-50%);
+}
+
+.m-head {
+  width: 4.2em;
+  height: 5em;
+  border-radius: 50% 50% 46% 46%;
+  background: color-mix(in oklab, var(--paper) 22%, transparent);
+}
+
+.m-shoulders {
+  width: 11em;
+  height: 3.6em;
+  margin-top: 0.4em;
+  border-radius: 5.5em 5.5em 0 0;
+  background: color-mix(in oklab, var(--paper) 14%, transparent);
+}
+
+/* Head box: searching, then locked on. */
+.m-lock {
+  position: absolute;
+  left: 50%;
+  bottom: 3.3em;
+  width: 5.6em;
+  height: 6.4em;
+  margin-left: -2.8em;
+  border: 1.5px solid var(--paper);
+  border-radius: 0.5em;
+  animation: lock 3.2s var(--ease-out) infinite;
+}
+
+@keyframes lock {
+  0%,
+  30% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+  50%,
+  92% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+.m-scan {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -2.2em;
+  height: 2.2em;
+  background: linear-gradient(transparent, color-mix(in oklab, var(--paper) 22%, transparent));
+  border-bottom: 1px solid color-mix(in oklab, var(--paper) 70%, transparent);
+  animation: scan 3.2s ease-in-out infinite;
+}
+
+/* Top to bottom of the frame at any size. */
+@keyframes scan {
+  0% {
+    top: -2.2em;
+  }
+  45% {
+    top: calc(100% - 2.2em);
+    opacity: 1;
+  }
+  50%,
+  100% {
+    top: calc(100% - 2.2em);
+    opacity: 0;
+  }
+}
+
+.m-rec {
+  position: absolute;
+  top: 0.9em;
+  left: 2.4em;
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  font-size: 0.65em;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.m-rec-dot {
+  width: 0.6em;
+  height: 0.6em;
+  border-radius: 50%;
+  background: var(--paper);
+  animation: blink 1.2s steps(2) infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0.2;
+  }
+}
+
+.m-marked {
+  position: absolute;
+  right: 1em;
+  bottom: 1em;
+  padding: 0.3em 0.8em;
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--color-ink);
+  font-size: 0.68em;
+  animation: marked 3.2s var(--ease-spring) infinite;
+}
+
+@keyframes marked {
+  0%,
+  50% {
+    transform: translateY(0.6em);
+    opacity: 0;
+  }
+  58%,
+  92% {
+    transform: none;
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ---------- Buttons dressed as chips ---------- */
+
+button.chip {
+  cursor: pointer;
+}
+
+button.chip[aria-disabled] {
+  cursor: default;
+}
+
+.kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.6em;
+  padding: 0.15em 0.45em;
+  border-radius: 0.4em;
+  background: color-mix(in oklab, white 55%, transparent);
+  box-shadow:
+    inset 0 -1px 0 color-mix(in oklab, var(--color-ink) 18%, transparent),
+    inset 0 0 0 1px color-mix(in oklab, var(--color-ink) 12%, transparent);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--color-graphite);
+}
+
+/* ---------- Command palette ---------- */
+
+.palette-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  display: grid;
+  justify-items: center;
+  align-items: start;
+  padding: 14vh 1rem 1rem;
+  background: color-mix(in oklab, var(--stage) 55%, transparent);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  animation: fade-in 200ms ease both;
+}
+
+.palette {
+  width: min(36rem, 100%);
+  overflow: hidden;
+  border-radius: 1.25rem;
+  background: color-mix(in oklab, white 72%, var(--stage));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.8),
+    0 0 0 1px color-mix(in oklab, var(--color-ink) 10%, transparent),
+    0 40px 80px -30px rgb(20 21 24 / 0.55);
+  animation: palette-in 380ms var(--ease-spring) both;
+}
+
+.palette-list {
+  max-height: min(24rem, 55vh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.4rem;
+}
+
+.palette-group {
+  padding: 0.8rem 0.85rem 0.35rem;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-graphite);
+}
+
+.palette-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 0.75rem;
+  font-size: 15px;
+  cursor: pointer;
+  transition:
+    background 150ms ease,
+    color 150ms ease,
+    padding-left 250ms var(--ease-out);
+}
+
+.palette-item[data-cursor-on] {
+  padding-left: 1.15rem;
+  background: var(--color-ink);
+  color: var(--paper);
+}
+
+.palette-hint {
+  font-size: 12px;
+  color: var(--color-graphite);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.palette-item[data-cursor-on] .palette-hint {
+  color: color-mix(in oklab, var(--paper) 60%, transparent);
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes palette-in {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.96);
+  }
+}
+
+/* ---------- Toast ---------- */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 1.5rem;
+  z-index: 96;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 1.1rem 0.7rem 0.75rem;
+  border-radius: 999px;
+  background: var(--color-ink);
+  color: var(--paper);
+  font-size: 14px;
+  box-shadow: 0 18px 40px -16px rgb(20 21 24 / 0.7);
+  translate: -50% 160%;
+  transition: translate 500ms var(--ease-spring);
+  pointer-events: none;
+}
+
+.toast[data-shown] {
+  translate: -50% 0;
+}
+
+.toast-check {
+  display: grid;
+  place-items: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--color-ink);
+  font-size: 11px;
+}
+
+/* ---------- Section rail ---------- */
+
+.section-rail {
+  position: fixed;
+  left: 1.5rem;
+  bottom: 1.5rem;
+  z-index: 40;
+  opacity: 0;
+  translate: 0 0.75rem;
+  pointer-events: none;
+  transition:
+    opacity 400ms ease,
+    translate 500ms var(--ease-out);
+}
+
+.section-rail[data-shown] {
+  opacity: 1;
+  translate: 0 0;
+  pointer-events: auto;
+}
+
+@media (max-width: 1023px) {
+  .section-rail {
+    display: none;
+  }
+}
+
+.rail-tick {
+  display: block;
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+  background: linear-gradient(color-mix(in oklab, var(--color-ink) 25%, transparent) 0 0) center / 100% 1.5px no-repeat;
+  transition:
+    width 450ms var(--ease-out),
+    background-size 300ms ease;
+}
+
+.rail-tick:hover {
+  background-image: linear-gradient(var(--color-ink) 0 0);
+}
+
+.rail-tick[aria-current] {
+  width: 34px;
+  background-image: linear-gradient(var(--color-ink) 0 0);
+}
+
+/* ---------- Contact ---------- */
+
+.status-dot {
+  position: relative;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-ink);
+}
+
+.status-dot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid var(--color-ink);
+  animation: status-ping 2s ease-out infinite;
+}
+
+@keyframes status-ping {
+  to {
+    transform: scale(3);
+    opacity: 0;
+  }
+}
+
+/* ---------- Views and hearts ---------- */
+
+/* Odometer: each digit is a strip of 0–9 slid to the right place. */
+.rolling {
+  display: inline-flex;
+  font-variant-numeric: tabular-nums;
+}
+
+.rolling-col {
+  display: inline-block;
+  height: 1.2em;
+  overflow: hidden;
+  line-height: 1.2;
+}
+
+.rolling-strip {
+  display: flex;
+  flex-direction: column;
+  transform: translateY(calc(var(--n) * -1.2em));
+  transition: transform 900ms var(--ease-spring);
+}
+
+.stat-skeleton {
+  display: inline-block;
+  width: 1.6em;
+  height: 0.8em;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--color-ink) 10%, transparent);
+  animation: blink 1.2s ease-in-out infinite;
+}
+
+.eye,
+.heart {
+  width: 1.05em;
+  height: 1.05em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+
+.heart {
+  overflow: visible;
+  transition:
+    fill 250ms ease,
+    transform 500ms var(--ease-spring);
+}
+
+.heart[data-filled] {
+  fill: currentColor;
+  animation: heart-pop 600ms var(--ease-spring);
+}
+
+@keyframes heart-pop {
+  0% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(0.6);
+  }
+  65% {
+    transform: scale(1.35);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.love-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  cursor: pointer;
+  transition: background 300ms ease;
+}
+
+@media (hover: hover) {
+  .love-button:not([data-loved]):hover .heart {
+    transform: scale(1.15);
+  }
+
+  .glass .love-button:hover {
+    background: rgb(255 255 255 / 0.45);
+  }
+}
+
+/* Ink drops thrown out of the heart. */
+.burst {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  pointer-events: none;
+}
+
+.burst i {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  margin: -2px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: burst 700ms var(--ease-out) forwards;
+}
+
+.burst i:nth-child(odd) {
+  width: 3px;
+  height: 6px;
+  border-radius: 2px;
+}
+
+@keyframes burst {
+  0% {
+    transform: rotate(var(--a)) translateY(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(var(--a)) translateY(calc(var(--d) * -1)) scale(0.3);
+    opacity: 0;
+  }
+}
+
+/* The footer's big heart. */
+.love-big {
+  gap: 0.75rem;
+  padding: 0.9rem 1.6rem 0.9rem 1.3rem;
+  border-radius: 999px;
+  font-size: 1.15rem;
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-ink) 25%, transparent);
+  transition:
+    background 350ms ease,
+    color 350ms ease,
+    transform 300ms var(--ease-spring);
+}
+
+.love-big .heart {
+  width: 1.4em;
+  height: 1.4em;
+}
+
+.love-big:active {
+  transform: scale(0.95);
+}
+
+.love-big[data-loved] {
+  background: var(--color-ink);
+  color: var(--paper);
+}
+
+@media (hover: hover) {
+  .love-big:not([data-loved]):hover {
+    background: color-mix(in oklab, white 50%, transparent);
+  }
+}
+
+/* ---------- Signature ---------- */
+
+/* Sized so "Prasoon Katiyar" spans the content width. */
+.signature {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  gap: 0.18em;
+  padding-top: 4rem;
+  font-size: clamp(2.5rem, 11.6vw, 9.5rem);
+  font-weight: 500;
+  line-height: 0.95;
+  letter-spacing: -0.055em;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.signature-word {
+  display: inline-flex;
+}
+
+.signature-word.italic {
+  letter-spacing: -0.02em;
+}
+
+.signature-mask {
+  display: inline-block;
+  overflow: hidden;
+  /* Room above for the hover lift, below for descenders. */
+  padding: 0.2em 0.03em 0.12em;
+  margin: -0.2em -0.03em -0.12em;
+}
+
+.signature-char {
+  display: inline-block;
+  transform: translateY(105%);
+  transition: transform 1000ms var(--ease-out);
+  transition-delay: calc(400ms + var(--i) * 45ms);
+}
+
+.reveal[data-in] .signature-char {
+  transform: none;
+}
+
+/* Once in, letters lift toward the cursor and settle back. */
+.reveal[data-done] .signature-char {
+  transition: transform 600ms var(--ease-spring);
+  transition-delay: 0ms;
+}
+
+@media (hover: hover) {
+  .reveal[data-done] .signature-mask:hover .signature-char {
+    transform: translateY(-12%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  body::after,
+  .journey-step:hover .journey-dot,
+  .section-title:hover .tail-char,
+  .status-dot::after,
+  .palette-backdrop,
+  .palette {
+    animation: none;
+  }
+
+  .scribble path {
+    stroke-dashoffset: 0;
+    transition: none;
+  }
+
+  .signature-char {
+    transform: none;
+    transition: none;
+  }
+
+  .mock * {
+    animation: none !important;
+  }
+}
