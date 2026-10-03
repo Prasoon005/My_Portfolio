@@ -2,6 +2,8 @@
 
 A scroll-scrubbed liquid-chrome self-portrait, built with Next.js (App Router), TypeScript, Tailwind CSS v4, GSAP and Lenis.
 
+**Live:** https://my-portfolio-two-sigma-88.vercel.app
+
 ## 1. Add your frames
 
 The hero plays whatever is inside `public/hero/frames`. Files must be named `frame_0001.jpg`, `frame_0002.jpg`, … (the first one is also the poster, the mobile still and the social preview).

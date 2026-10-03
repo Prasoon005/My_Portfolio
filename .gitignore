@@ -36,6 +36,7 @@ service-account*.json
 
 # local scratch / screenshots
 problems/
+vercel_images/
 
 # logs
 npm-debug.log*
